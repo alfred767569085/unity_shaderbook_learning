@@ -25,26 +25,32 @@
             };
             struct v2f {
                 float4 pos : SV_POSITION;
-                float3 worldNormal : TEXCOORD0;
-                float3 worldPos : TEXCOORD1;
+                float3 worldPos : TEXCOORD0;
+                fixed3 worldNormal : TEXCOORD2;
+                fixed3 unimportantLight : TEXCOORD3;
             };
             v2f vert(a2v v) {
                 v2f o;
                 o.pos = UnityObjectToClipPos(v.vertex);
-                o.worldNormal = UnityObjectToWorldNormal(v.normal);
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+                o.worldNormal = UnityObjectToWorldNormal(v.normal);
+                
+                o.unimportantLight = Shade4PointLights(unity_4LightPosX0, unity_4LightPosY0, unity_4LightPosZ0,
+                unity_LightColor[0].rgb, unity_LightColor[1].rgb, unity_LightColor[2].rgb, unity_LightColor[3].rgb,
+                unity_4LightAtten0, o.worldPos, o.worldNormal);
+
                 return o;
             }
             fixed4 frag(v2f i) : SV_TARGET {
                 fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
                 fixed3 worldNormal = normalize(i.worldNormal);
-                fixed3 worldLight = normalize(UnityWorldSpaceLightDir(i.worldPos));
+                fixed3 worldLight = UnityWorldSpaceLightDir(i.worldPos);
+                fixed3 worldView = UnityWorldSpaceViewDir(i.worldPos);
+                fixed3 worldHalf = normalize(worldLight + worldView);
                 fixed3 diffuse = _LightColor0.rgb * _Diffuse.rgb * saturate(dot(worldNormal, worldLight));
-                fixed3 worldView = normalize(UnityWorldSpaceViewDir(i.worldPos));
-                fixed3 worldHalf = normalize(worldView + worldLight);
                 fixed3 specular = _LightColor0.rgb * _Specular.rgb * pow(saturate(dot(worldNormal, worldHalf)), _Gloss);
                 fixed atten = 1.0;
-                return fixed4(ambient + (diffuse + specular) * atten, 1.0);
+                return fixed4(ambient + (diffuse + specular) * atten + i.unimportantLight, 1.0);
             }
             ENDCG
         }
@@ -89,7 +95,6 @@
                     float3 lightCoord = mul(unity_WorldToLight, float4(i.worldPos.xyz, 1)).xyz;
                     fixed atten = tex2D(_LightTexture0, dot(lightCoord,lightCoord).rr).UNITY_ATTEN_CHANNEL;
                 #endif
-
                 fixed3 diffuse = _LightColor0.rgb * _Diffuse.rgb * saturate(dot(worldNormal, worldLight));
                 fixed3 worldView = normalize(UnityWorldSpaceViewDir(i.worldPos));
                 fixed3 worldHalf = normalize(worldView + worldLight);

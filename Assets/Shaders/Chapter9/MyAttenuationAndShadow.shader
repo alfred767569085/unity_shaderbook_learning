@@ -46,7 +46,10 @@
                 fixed3 worldView = normalize(UnityWorldSpaceViewDir(i.worldPos));
                 fixed3 worldHalf = normalize(worldView + worldLight);
                 fixed3 specular = _LightColor0.rgb * _Specular.rgb * pow(saturate(dot(worldNormal, worldHalf)), _Gloss);
+                
+                // fixed atten = SHADOW_ATTENUATION(i);
                 UNITY_LIGHT_ATTENUATION(atten, i, i.worldPos);
+                
                 return fixed4(ambient + (diffuse + specular) * atten, 1.0);
             }
             ENDCG
@@ -86,6 +89,8 @@
             fixed4 frag(v2f i) : SV_TARGET {
                 fixed3 worldNormal = normalize(i.worldNormal);
                 fixed3 worldLight = normalize(UnityWorldSpaceLightDir(i.worldPos));
+                
+                // fixed atten = SHADOW_ATTENUATION(i);
                 UNITY_LIGHT_ATTENUATION(atten, i, i.worldPos);
 
                 fixed3 diffuse = _LightColor0.rgb * _Diffuse.rgb * saturate(dot(worldNormal, worldLight));

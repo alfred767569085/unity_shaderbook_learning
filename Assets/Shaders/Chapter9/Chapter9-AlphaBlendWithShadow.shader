@@ -10,6 +10,7 @@
 		Pass {
 			Tags { "LightMode"="ForwardBase" }
 			
+			Cull off
 			ZWrite Off
 			Blend SrcAlpha OneMinusSrcAlpha
 			
@@ -29,7 +30,7 @@
 			fixed _AlphaScale;
 			
 			struct a2v {
-				float4 vertex : POSITION;
+				float4 vertex : POSITION; 
 				float3 normal : NORMAL;
 				float4 texcoord : TEXCOORD0;
 			};

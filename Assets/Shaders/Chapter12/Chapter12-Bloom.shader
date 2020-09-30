@@ -27,7 +27,7 @@
 			o.pos = UnityObjectToClipPos(v.vertex);
 			
 			o.uv = v.texcoord;
-					 
+			
 			return o;
 		}
 		
@@ -55,10 +55,10 @@
 			o.uv.zw = v.texcoord;
 			
 			#if UNITY_UV_STARTS_AT_TOP			
-			if (_MainTex_TexelSize.y < 0.0)
+				if (_MainTex_TexelSize.y < 0.0)
 				o.uv.w = 1.0 - o.uv.w;
 			#endif
-				        	
+			
 			return o; 
 		}
 		

@@ -58,7 +58,8 @@
                 fixed3 reflection = texCUBE(_Cubemap, i.worldRefl).rgb * _ReflectColor.rgb;
                 UNITY_LIGHT_ATTENUATION(atten, i, i.worldPos);
 
-                return fixed4(ambient + lerp(diffuse, reflection, _ReflectAmount), 1.0);
+                return fixed4(ambient + atten * lerp(diffuse, reflection, _ReflectAmount), 1.0);
+                // return fixed4(ambient + (diffuse + reflection * _ReflectAmount) * atten, 1.0);
             }
 
             ENDCG
@@ -66,3 +67,27 @@
     }
     FallBack "Diffuse"
 }
+
+/*
+v1 = (x1,y1,z1), v2 = (x2,y2,z2), v3 = (x3,y3,z3)
+
+x1^2 + y1^2 + z1^2 = 1
+a + b + c = 1
+a,b,c > 0 
+
+M = (ax1+bx2+cx3)^2 + (ay1+by2+cy3)^2 + (az1+bz2+cz3)^2
+
+M = a2x12 + b2x22 + c2x32 + 2abx1x2 + 2acx1x3 + 2bcx2x3
++ a2y12 + b2y22 + c2y32 + 2aby1y2 + 2acy1y3 + 2bcy2y3
++ a2z12 + b2z22 + c2z32 + 2abz1z2 + 2acz1z3 + 2bcz2z3
+
+M = a2 + b2 + c2 + 2ab(x1x2+y1y2+z1z2) + 2ac(x1x3+y1y3+z1z3) + 2bc(x2x3+y2y3+z2z3)
+M - 1 = 2ab(x1x2+y1y2+z1z2 - 1) + 2ac(x1x3+y1y3+z1z3 - 1) + 2bc(x2x3+y2y3+z2z3 - 1)
+
+2 * (x1x2+y1y2+z1z2 - 1) = -(x12+y12+z12+x22+y22+z22 -2x1x2-2y1y2-2z1z1)
+2 * (x1x2+y1y2+z1z2 - 1) = -((x1-x2)2 + (y1-y2)2 + (z1-z2)2) <= 0
+
+M <= 1
+(when v1 = v2 = v3)
+
+*/
